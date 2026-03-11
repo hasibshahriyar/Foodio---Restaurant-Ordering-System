@@ -9,8 +9,11 @@ import FoodCard from '@/components/FoodCard';
 import { MenuItem, Category } from '@/lib/types';
 import api from '@/lib/api';
 
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=900&q=80';
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80',
+  'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=80',
+];
 
 function getCategoryIcon(name: string) {
   switch (name.toLowerCase()) {
@@ -31,6 +34,14 @@ export default function HomePage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroImgError, setHeroImgError] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroIndex((i) => (i + 1) % HERO_IMAGES.length);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     api.get('/categories').then((res) => setCategories(res.data));
@@ -105,7 +116,7 @@ export default function HomePage() {
                 <div className="absolute inset-0 rounded-full blur-[42px] overflow-hidden opacity-40">
                   {!heroImgError && (
                     <Image
-                      src={HERO_IMAGE}
+                      src={HERO_IMAGES[heroIndex]}
                       alt=""
                       fill
                       className="object-cover"
@@ -116,14 +127,18 @@ export default function HomePage() {
                 {/* Main image */}
                 <div className="relative w-[440px] h-[440px] rounded-full overflow-hidden">
                   {!heroImgError ? (
-                    <Image
-                      src={HERO_IMAGE}
-                      alt="Featured dish"
-                      fill
-                      className="object-cover"
-                      priority
-                      onError={() => setHeroImgError(true)}
-                    />
+                    HERO_IMAGES.map((src, idx) => (
+                      <Image
+                        key={src}
+                        src={src}
+                        alt={`Featured dish ${idx + 1}`}
+                        fill
+                        className="object-cover absolute inset-0"
+                        style={{ opacity: idx === heroIndex ? 1 : 0, transition: 'opacity 0.6s ease-in-out' }}
+                        priority={idx === 0}
+                        onError={() => setHeroImgError(true)}
+                      />
+                    ))
                   ) : (
                     <div className="w-full h-full bg-[#FEF7EA] flex items-center justify-center text-8xl">🍽️</div>
                   )}
@@ -131,7 +146,7 @@ export default function HomePage() {
               </div>
 
               {/* Floating card: Avg. Delivery — left side, mid-bottom */}
-              <div className="absolute bottom-[140px] left-[-30px] z-20 bg-white border border-[#E6E2D8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[12px] p-3 flex items-center gap-3">
+              <div className="animate-float absolute bottom-[140px] left-[-30px] z-20 bg-white border border-[#E6E2D8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[12px] p-3 flex items-center gap-3">
                 <div className="w-11 h-11 bg-[#FDF6EA] border border-[#E6E2D8] rounded-[6px] flex items-center justify-center flex-shrink-0">
                   <Clock size={20} strokeWidth={2} className="text-primary-500" />
                 </div>
@@ -142,7 +157,7 @@ export default function HomePage() {
               </div>
 
               {/* Floating card: Today's Offer — top right */}
-              <div className="absolute top-[95px] right-[-10px] z-20 bg-white border border-[#E6E2D8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[12px] p-3 flex items-center gap-3">
+              <div className="animate-float-delayed absolute top-[95px] right-[-10px] z-20 bg-white border border-[#E6E2D8] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] rounded-[12px] p-3 flex items-center gap-3">
                 <div className="w-11 h-11 bg-[#FDF6EA] border border-[#E6E2D8] rounded-[6px] flex items-center justify-center flex-shrink-0 text-xl">
                   🔥
                 </div>
