@@ -26,8 +26,8 @@ export class Order {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ nullable: true })
-  userId: string;
+  @Column({ type: 'varchar', nullable: true })
+  userId: string | null;
 
   @OneToMany(() => OrderItem, (item) => item.order, { eager: true, cascade: true })
   items: OrderItem[];
@@ -38,8 +38,8 @@ export class Order {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-  @Column({ nullable: true })
-  deliveryAddress: string;
+  @Column({ type: 'varchar', nullable: true })
+  deliveryAddress: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

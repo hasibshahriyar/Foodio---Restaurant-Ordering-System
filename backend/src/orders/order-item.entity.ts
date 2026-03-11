@@ -24,8 +24,8 @@ export class OrderItem {
   @JoinColumn({ name: 'menuItemId' })
   menuItem: MenuItem;
 
-  @Column({ nullable: true })
-  menuItemId: string;
+  @Column({ type: 'varchar', nullable: true })
+  menuItemId: string | null;
 
   @Column()
   quantity: number;

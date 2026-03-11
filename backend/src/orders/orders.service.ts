@@ -52,7 +52,7 @@ export class OrdersService {
       userId: user.id,
       items: orderItems,
       totalAmount,
-      deliveryAddress: dto.deliveryAddress || user.address,
+      deliveryAddress: dto.deliveryAddress || user.address || null,
     });
 
     return this.ordersRepository.save(order);
