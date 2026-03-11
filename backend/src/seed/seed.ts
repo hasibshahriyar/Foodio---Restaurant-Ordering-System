@@ -3,18 +3,22 @@ import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../users/user.entity';
 import { Category } from '../categories/category.entity';
 import { MenuItem } from '../menu-items/menu-item.entity';
+import { Order } from '../orders/order.entity';
+import { OrderItem } from '../orders/order-item.entity';
 
 export async function seed(dataSource: DataSource) {
   const userRepo = dataSource.getRepository(User);
   const categoryRepo = dataSource.getRepository(Category);
   const menuItemRepo = dataSource.getRepository(MenuItem);
+  const orderItemRepo = dataSource.getRepository(OrderItem);
+  const orderRepo = dataSource.getRepository(Order);
 
   console.log('🌱 Seeding database...');
 
-  // Clear existing data
-  await menuItemRepo.delete({});
-  await categoryRepo.delete({});
-  await userRepo.delete({});
+  // Clear all tables in one shot (CASCADE handles FK constraints)
+  await dataSource.query(
+    'TRUNCATE TABLE order_items, orders, menu_items, categories, users CASCADE'
+  );
 
   // Users
   const adminPassword = await bcrypt.hash('admin123', 10);
