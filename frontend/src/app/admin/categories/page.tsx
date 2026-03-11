@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil, X, Check } from 'lucide-react';
 import { Category } from '@/lib/types';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -80,125 +79,134 @@ export default function AdminCategoriesPage() {
 
   return (
     <>
+      {/* Top row */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Manage menu categories</p>
-        </div>
+        <div />
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+          className="flex items-center gap-2"
+          style={{ background: '#1A3C34', borderRadius: 56, height: 36, paddingLeft: 16, paddingRight: 16, border: 'none', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: 'white', cursor: 'pointer' }}
         >
-          <Plus size={16} />
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3V13M3 8H13" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
           Add Category
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      {/* Table */}
+      <div style={{ background: 'white', border: '1px solid #E6E2D8', borderRadius: 12, overflow: 'hidden' }}>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3.5">Name</th>
-              <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-5 py-3.5">Actions</th>
+            <tr style={{ background: '#FBFAF8', borderBottom: '1px solid #E6E2D8' }}>
+              <th className="text-left px-5" style={{ height: 44, fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 12, color: '#7A7A7A', letterSpacing: '0.06em' }}>NAME</th>
+              <th className="text-left px-5" style={{ height: 44, fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 12, color: '#7A7A7A', letterSpacing: '0.06em' }}>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              [1,2,3].map((i) => (
-                <tr key={i} className="border-b border-gray-100">
-                  <td className="px-5 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse w-32" /></td>
-                  <td className="px-5 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse w-16" /></td>
-                </tr>
-              ))
-            ) : categories.map((cat) => (
-              <tr key={cat.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="px-5 py-4">
-                  {editingId === cat.id ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleEdit(cat.id);
-                          if (e.key === 'Escape') cancelEdit();
-                        }}
-                        autoFocus
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 w-48"
-                      />
-                      <button
-                        onClick={() => handleEdit(cat.id)}
-                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        title="Save"
-                      >
-                        <Check size={15} />
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Cancel"
-                      >
-                        <X size={15} />
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="font-medium text-gray-900">{cat.name}</span>
-                  )}
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-2">
-                    {editingId !== cat.id && (
-                      <button
-                        onClick={() => startEdit(cat)}
-                        className="p-1.5 text-gray-500 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
-                        title="Edit category"
-                      >
-                        <Pencil size={15} />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleDelete(cat.id)}
-                      className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete category"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {loading
+              ? [1, 2, 3].map((i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #E6E2D8' }}>
+                    <td className="px-5 py-4"><div className="h-4 rounded animate-pulse w-32" style={{ background: '#E6E2D8' }} /></td>
+                    <td className="px-5 py-4"><div className="h-4 rounded animate-pulse w-16" style={{ background: '#E6E2D8' }} /></td>
+                  </tr>
+                ))
+              : categories.map((cat) => (
+                  <tr key={cat.id} style={{ borderBottom: '1px solid #E6E2D8', height: 49 }}>
+                    <td className="px-5">
+                      {editingId === cat.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleEdit(cat.id);
+                              if (e.key === 'Escape') cancelEdit();
+                            }}
+                            autoFocus
+                            className="focus:outline-none"
+                            style={{ height: 34, padding: '0 12px', border: '1px solid #1A3C34', borderRadius: 6, fontFamily: 'Manrope, sans-serif', fontSize: 14, width: 200 }}
+                          />
+                          <button onClick={() => handleEdit(cat.id)} style={{ color: '#008236' }}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <path d="M3 8L6.5 11.5L13 5" stroke="#008236" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                          <button onClick={cancelEdit} style={{ color: '#7A7A7A' }}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <path d="M4 4L12 12M12 4L4 12" stroke="#7A7A7A" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 14, color: '#1A1A1A' }}>{cat.name}</span>
+                      )}
+                    </td>
+                    <td className="px-5">
+                      <div className="flex items-center gap-2">
+                        {editingId !== cat.id && (
+                          <button
+                            onClick={() => startEdit(cat)}
+                            className="flex items-center justify-center"
+                            style={{ width: 36, height: 36, background: '#1A3C34', borderRadius: 6, border: 'none', cursor: 'pointer' }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                              <path d="M11.5 2.5L13.5 4.5L6 12H4V10L11.5 2.5Z" stroke="white" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(cat.id)}
+                          className="flex items-center justify-center"
+                          style={{ width: 36, height: 36, background: 'transparent', borderRadius: 6, border: '1px solid #E6E2D8', cursor: 'pointer' }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 4H14M5 4V3C5 2.448 5.448 2 6 2H10C10.552 2 11 2.448 11 3V4M6 7V12M10 7V12M3 4L4 13C4 13.552 4.448 14 5 14H11C11.552 14 12 13.552 12 13L13 4" stroke="#D64045" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>
 
       {/* Add Category Modal */}
       {showAdd && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="font-bold text-gray-900 mb-4">Add Category</h3>
-            <form onSubmit={handleAdd} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div
+            className="p-6"
+            style={{ width: 512, background: '#FBFAF8', border: '1px solid #E6E2D8', borderRadius: 12, boxShadow: '0px 21.77px 54.43px rgba(26,60,52,0.1)' }}
+          >
+            <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 18, color: '#1A3C34', marginBottom: 20 }}>
+              Add Category
+            </p>
+            <form onSubmit={handleAdd}>
+              <div className="mb-5">
+                <label style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13, color: '#7A7A7A', display: 'block', marginBottom: 6 }}>Name</label>
                 <input
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
+                  className="focus:outline-none w-full"
+                  style={{ height: 36, padding: '0 12px', background: 'white', border: '1px solid #E6E2D8', borderRadius: 6, fontFamily: 'Manrope, sans-serif', fontSize: 14 }}
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowAdd(false)}
-                  className="flex-1 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+                  style={{ height: 36, padding: '0 16px', border: '1px solid #1A3C34', borderRadius: 46, background: 'transparent', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#1A3C34', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={adding}
-                  className="flex-1 py-2.5 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-white font-medium rounded-lg"
+                  style={{ height: 36, padding: '0 20px', background: '#1A3C34', borderRadius: 46, border: 'none', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: 'white', cursor: 'pointer', opacity: adding ? 0.6 : 1 }}
                 >
                   {adding ? 'Adding...' : 'Add'}
                 </button>
@@ -210,3 +218,4 @@ export default function AdminCategoriesPage() {
     </>
   );
 }
+

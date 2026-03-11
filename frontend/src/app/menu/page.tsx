@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import UserLayout from '@/components/UserLayout';
 import FoodCard from '@/components/FoodCard';
 import { MenuItem, Category } from '@/lib/types';
@@ -11,12 +10,11 @@ export default function MenuPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [items, setItems] = useState<MenuItem[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showSort, setShowSort] = useState(false);
   const [sortBy, setSortBy] = useState<'price' | 'name' | ''>('');
-  const [filterAvail, setFilterAvail] = useState<'' | 'true' | 'false'>('');
+  const sortRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.get('/categories').then((res) => setCategories(res.data));
@@ -28,151 +26,164 @@ export default function MenuPage() {
     if (activeCategory !== 'all') params.categoryId = activeCategory;
     if (search) params.search = search;
     if (sortBy) params.sortBy = sortBy;
-    if (filterAvail) params.isAvailable = filterAvail;
     api
       .get('/menu-items', { params })
       .then((res) => {
         setItems(res.data.data);
-        setTotal(res.data.total);
       })
       .finally(() => setLoading(false));
-  }, [activeCategory, search, sortBy, filterAvail]);
+  }, [activeCategory, search, sortBy]);
 
   useEffect(() => {
     const timer = setTimeout(fetchItems, 300);
     return () => clearTimeout(timer);
   }, [fetchItems]);
 
-  const clearFilters = () => {
-    setSortBy('');
-    setFilterAvail('');
-    setShowSort(false);
-  };
+  // Close sort dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setShowSort(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   return (
     <UserLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="px-[105px] py-[48px]">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Our Menu</h1>
-          <p className="text-gray-500">Discover our selection of premium dishes, crafted with passion.</p>
+        <div className="text-center mb-8">
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: 54, color: '#1A3C34', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            Our Menu
+          </h1>
+          <p className="mt-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 18, color: '#2D2D2D' }}>
+            Discover our selection of premium dishes, crafted with passion.
+          </p>
         </div>
 
-        {/* Category tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {['all', ...categories.map((c) => c.id)].map((id) => {
-            const label = id === 'all' ? 'All' : categories.find((c) => c.id === id)?.name || '';
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveCategory(id)}
-                className={`px-5 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeCategory === id
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Filter bar */}
+        <div className="flex items-center gap-2 mb-8 flex-wrap">
+          {/* Category pills */}
+          <button
+            onClick={() => setActiveCategory('all')}
+            className="h-[36px] px-4 rounded-full text-[14px] transition-colors"
+            style={activeCategory === 'all'
+              ? { background: '#1A3C34', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 500, border: 'none' }
+              : { background: '#FBFAF8', color: '#1A1A1A', fontFamily: 'Manrope, sans-serif', fontWeight: 500, border: '1px solid #E6E2D8' }
+            }
+          >
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className="h-[36px] px-4 rounded-full text-[14px] transition-colors whitespace-nowrap"
+              style={activeCategory === cat.id
+                ? { background: '#1A3C34', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 500, border: 'none' }
+                : { background: '#FBFAF8', color: '#1A1A1A', fontFamily: 'Manrope, sans-serif', fontWeight: 500, border: '1px solid #E6E2D8' }
+              }
+            >
+              {cat.name}
+            </button>
+          ))}
 
-        {/* Search + Sort */}
-        <div className="flex gap-3 mb-8">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search dishes..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white"
-            />
-          </div>
-          <div className="relative">
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Sort button */}
+          <div className="relative" ref={sortRef}>
             <button
               onClick={() => setShowSort(!showSort)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 h-[36px] px-4 rounded-full"
+              style={{ background: '#1A3C34', color: 'white', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14 }}
             >
-              <SlidersHorizontal size={16} />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4H14M4 8H12M6 12H10" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
               Sort
             </button>
             {showSort && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-30">
-                <p className="font-semibold text-gray-800 text-sm mb-3">Sort by</p>
-                <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="sort"
-                    checked={sortBy === 'name'}
-                    onChange={() => setSortBy('name')}
-                    className="accent-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">Name (A-Z)</span>
-                </label>
-                <label className="flex items-center gap-2 mb-4 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="sort"
-                    checked={sortBy === 'price'}
-                    onChange={() => setSortBy('price')}
-                    className="accent-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">Price</span>
-                </label>
-                <p className="font-semibold text-gray-800 text-sm mb-3">Availability</p>
-                <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="avail"
-                    checked={filterAvail === 'true'}
-                    onChange={() => setFilterAvail('true')}
-                    className="accent-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">Available</span>
-                </label>
-                <label className="flex items-center gap-2 mb-4 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="avail"
-                    checked={filterAvail === 'false'}
-                    onChange={() => setFilterAvail('false')}
-                    className="accent-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">Unavailable</span>
-                </label>
-                <button
-                  onClick={clearFilters}
-                  className="w-full text-sm text-primary-500 hover:underline"
-                >
-                  Clear
-                </button>
+              <div
+                className="absolute right-0 top-full mt-2 z-30 py-1"
+                style={{ background: '#FFFFFF', border: '1px solid #E6E2D8', borderRadius: 8, boxShadow: '0px 4px 6px -1px rgba(0,0,0,0.1), 0px 2px 4px -2px rgba(0,0,0,0.1)', width: 213 }}
+              >
+                <p className="px-3 py-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 16, color: '#1A3C34' }}>Sort by</p>
+                <div style={{ height: 1, background: '#E6E2D8', margin: '0 4px' }} />
+                {[{ value: 'price', label: 'Price' }, { value: 'name', label: 'Name (A–Z)' }].map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setSortBy(opt.value as 'price' | 'name'); setShowSort(false); }}
+                    className="w-full flex items-center justify-between px-3 py-2 transition-colors"
+                    style={{
+                      background: sortBy === opt.value ? '#F7F7F7' : 'transparent',
+                      borderRadius: 4,
+                      fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#1A1A1A'
+                    }}
+                  >
+                    {opt.label}
+                    {sortBy === opt.value && (
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8L6.5 11.5L13 5" stroke="#1A3C34" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
+                ))}
+                {sortBy && (
+                  <>
+                    <div style={{ height: 1, background: '#E6E2D8', margin: '0 4px' }} />
+                    <button
+                      onClick={() => { setSortBy(''); setShowSort(false); }}
+                      className="w-full px-3 py-2 text-center"
+                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#7A7A7A' }}
+                    >
+                      Clear
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
+
+          {/* Search */}
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="5" stroke="#7A7A7A" strokeWidth="1.33"/>
+              <path d="M11 11L14 14" stroke="#7A7A7A" strokeWidth="1.33" strokeLinecap="round"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-[36px] pl-9 pr-4 focus:outline-none"
+              style={{ width: 310, background: '#FBFAF8', border: '1px solid #E6E2D8', borderRadius: 56, fontFamily: 'Manrope, sans-serif', fontSize: 14, color: '#1A1A1A' }}
+            />
+          </div>
         </div>
 
-        {/* Results */}
+        {/* Food grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-4 gap-5">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
-                <div className="h-44 bg-gray-200" />
+              <div key={i} className="rounded-[12px] border border-[#E6E2D8] overflow-hidden animate-pulse" style={{ background: '#FBFAF8' }}>
+                <div className="h-44" style={{ background: '#E6E2D8' }} />
                 <div className="p-4 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 rounded w-full" />
+                  <div className="h-4 rounded w-3/4" style={{ background: '#E6E2D8' }} />
+                  <div className="h-3 rounded w-full" style={{ background: '#E6E2D8' }} />
                 </div>
               </div>
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16" style={{ color: '#7A7A7A', fontFamily: 'Manrope, sans-serif' }}>
             <p className="text-5xl mb-3">🍽️</p>
             <p>No items found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-4 gap-5">
             {items.map((item) => (
               <FoodCard key={item.id} item={item} />
             ))}

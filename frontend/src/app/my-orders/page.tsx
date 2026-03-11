@@ -2,27 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Clock, ChefHat, Package } from 'lucide-react';
 import UserLayout from '@/components/UserLayout';
 import { useAuth } from '@/context/AuthContext';
 import { Order, OrderStatus } from '@/lib/types';
 import api from '@/lib/api';
 
 const STATUS_STEPS: OrderStatus[] = ['Pending', 'Preparing', 'Ready', 'Completed'];
-
-const statusIcon = (s: OrderStatus) => {
-  if (s === 'Pending') return <Clock size={14} />;
-  if (s === 'Preparing') return <ChefHat size={14} />;
-  if (s === 'Ready') return <Package size={14} />;
-  return <CheckCircle2 size={14} />;
-};
-
-const statusColor = (s: OrderStatus) => {
-  if (s === 'Completed') return 'bg-green-100 text-green-700';
-  if (s === 'Ready') return 'bg-blue-100 text-blue-700';
-  if (s === 'Preparing') return 'bg-yellow-100 text-yellow-700';
-  return 'bg-gray-100 text-gray-600';
-};
 
 export default function MyOrdersPage() {
   const { user, loading: authLoading } = useAuth();
@@ -58,22 +43,34 @@ export default function MyOrdersPage() {
 
   const getStepIndex = (status: OrderStatus) => STATUS_STEPS.indexOf(status);
 
+  const statusBadgeStyle = (s: OrderStatus): React.CSSProperties => {
+    if (s === 'Completed')
+      return { background: 'rgba(0,130,54,0.1)', color: '#008236', border: '1px solid rgba(0,130,54,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
+    if (s === 'Pending')
+      return { background: 'rgba(240,177,0,0.1)', color: '#D08700', border: '1px solid rgba(240,177,0,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
+    if (s === 'Preparing')
+      return { background: 'rgba(59,130,246,0.1)', color: '#2563EB', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
+    return { background: 'rgba(100,116,139,0.1)', color: '#475569', border: '1px solid rgba(100,116,139,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
+  };
+
   return (
     <UserLayout>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">My Orders</h1>
+      <div className="px-[105px] py-[48px]">
+        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: 32, color: '#1A3C34', marginBottom: 24 }}>
+          My Orders
+        </h1>
 
         {loading ? (
           <div className="space-y-4">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-3" />
-                <div className="h-3 bg-gray-200 rounded w-1/3" />
+              <div key={i} className="rounded-[12px] border border-[#E6E2D8] p-6 animate-pulse" style={{ background: '#FBFAF8' }}>
+                <div className="h-4 rounded w-1/2 mb-3" style={{ background: '#E6E2D8' }} />
+                <div className="h-3 rounded w-1/3" style={{ background: '#E6E2D8' }} />
               </div>
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16" style={{ color: '#7A7A7A', fontFamily: 'Manrope, sans-serif' }}>
             <p className="text-5xl mb-3">📋</p>
             <p>No orders yet</p>
           </div>
@@ -82,69 +79,68 @@ export default function MyOrdersPage() {
             {orders.map((order) => {
               const stepIdx = getStepIndex(order.status);
               return (
-                <div key={order.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
+                <div key={order.id} className="rounded-[12px] border border-[#E6E2D8] p-6" style={{ background: '#FBFAF8' }}>
+                  {/* Header row */}
+                  <div className="flex items-start justify-between mb-5">
                     <div>
-                      <p className="font-semibold text-gray-900">
-                        Order #{order.id.substring(0, 8)}
+                      <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 18, color: '#1A3C34' }}>
+                        Order #{order.id.substring(0, 8).toUpperCase()}
                       </p>
-                      <p className="text-sm text-gray-500 mt-0.5">
-                        Placed on {formatDate(order.createdAt)}
+                      <p className="mt-1" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 400, fontSize: 13, color: '#7A7A7A' }}>
+                        {formatDate(order.createdAt)}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">${Number(order.totalAmount).toFixed(2)}</p>
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full mt-1 ${statusColor(order.status)}`}>
-                        {statusIcon(order.status)}
-                        {order.status}
-                      </span>
-                    </div>
+                    <span style={statusBadgeStyle(order.status)}>{order.status}</span>
                   </div>
 
-                  {/* Items */}
-                  <div className="mb-4 space-y-1.5">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Items</p>
-                    {order.items.map((item) => (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span className="text-gray-600">
-                          {item.quantity}x {item.menuItem?.name || 'Item'}
-                        </span>
-                        <span className="text-gray-700">${(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between text-sm font-semibold pt-2 border-t border-gray-100">
-                      <span>Total Amount :</span>
-                      <span>${Number(order.totalAmount).toFixed(2)}</span>
-                    </div>
-                  </div>
-
+                  {/* Delivery address */}
                   {order.deliveryAddress && (
-                    <p className="text-sm text-gray-500 mb-4">
-                      Delivering to: {order.deliveryAddress}
+                    <p className="mb-4" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 400, fontSize: 13, color: '#7A7A7A' }}>
+                      Delivering to: <span style={{ color: '#2D2D2D', fontWeight: 500 }}>{order.deliveryAddress}</span>
                     </p>
                   )}
 
-                  {/* Status steps */}
-                  <div className="flex items-center gap-1">
-                    {STATUS_STEPS.map((step, i) => (
-                      <div key={step} className="flex items-center flex-1">
-                        <div className="flex flex-col items-center flex-1">
-                          <div
-                            className={`w-full h-1.5 rounded-full ${
-                              i <= stepIdx ? 'bg-primary-500' : 'bg-gray-200'
-                            }`}
-                          />
-                          <span
-                            className={`text-xs mt-1 font-medium ${
-                              i <= stepIdx ? 'text-primary-500' : 'text-gray-400'
-                            }`}
-                          >
-                            {step}
-                          </span>
-                        </div>
+                  {/* Items section */}
+                  <div className="mb-5">
+                    <p className="mb-3" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 12, color: '#7A7A7A', letterSpacing: '0.08em' }}>
+                      ITEMS
+                    </p>
+                    {order.items.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between mb-2">
+                        <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 400, fontSize: 14, color: '#2D2D2D' }}>
+                          {item.quantity}x {item.menuItem?.name || 'Item'}
+                        </span>
+                        <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#1A1A1A' }}>
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </span>
                       </div>
                     ))}
+                    <div style={{ height: 1, background: '#E6E2D8', margin: '12px 0' }} />
+                    <div className="flex items-center justify-between">
+                      <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 16, color: '#1A1A1A' }}>Total Amount :</span>
+                      <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 16, color: '#1A3C34' }}>${Number(order.totalAmount).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Status tracker */}
+                  <div className="flex items-center gap-0">
+                    {STATUS_STEPS.map((step, i) => {
+                      const active = i <= stepIdx;
+                      return (
+                        <div key={step} className="flex-1">
+                          <div
+                            className="h-[6px] rounded-full"
+                            style={{
+                              background: active ? '#1A3C34' : '#E4E4E4',
+                              marginRight: i < STATUS_STEPS.length - 1 ? 4 : 0,
+                            }}
+                          />
+                          <p className="mt-1.5 text-center" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 11, color: active ? '#1A3C34' : '#7A7A7A' }}>
+                            {step}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import { ShoppingCart, ChevronDown, ClipboardList, LogOut, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ChevronDown, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 
@@ -108,20 +108,27 @@ export default function Navbar() {
                   <ChevronDown size={14} />
                 </button>
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-[#E6E2D8] py-1 z-50">
+                  <div style={{ position: 'absolute', right: 0, marginTop: 8, width: 141, background: 'white', border: '1px solid #E6E2D8', borderRadius: 6, zIndex: 50, overflow: 'hidden' }}>
                     <Link
                       href="/my-orders"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#2D2D2D] hover:bg-[#FEF7EA] transition-colors"
+                      style={{ display: 'block', padding: '8px 12px', fontFamily: 'Manrope, sans-serif', fontSize: 13, color: '#7A7A7A', textDecoration: 'none' }}
                     >
-                      <ClipboardList size={16} />
-                      My Orders
+                      My Account
                     </Link>
+                    <div style={{ borderTop: '1px solid #E6E2D8' }} />
+                    <Link
+                      href="/my-orders"
+                      onClick={() => setDropdownOpen(false)}
+                      style={{ display: 'block', padding: '8px 12px', fontFamily: 'Manrope, sans-serif', fontSize: 13, color: '#1A1A1A', background: '#F7F7F7', textDecoration: 'none', borderRadius: 4, margin: '2px 4px' }}
+                    >
+                      Orders
+                    </Link>
+                    <div style={{ borderTop: '1px solid #E6E2D8' }} />
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      style={{ width: '100%', display: 'block', padding: '8px 12px', fontFamily: 'Manrope, sans-serif', fontSize: 13, color: '#D64045', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                     >
-                      <LogOut size={16} />
                       Sign out
                     </button>
                   </div>
