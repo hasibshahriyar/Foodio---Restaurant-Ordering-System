@@ -22,14 +22,14 @@ export class MenuItem {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   image: string | null;
 
   @ManyToOne(() => Category, { eager: true, onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   categoryId: string;
 
   @Column({ default: true })
