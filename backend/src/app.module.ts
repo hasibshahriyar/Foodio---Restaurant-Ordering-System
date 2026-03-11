@@ -18,16 +18,28 @@ import { OrderItem } from './orders/order-item.entity';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        host: process.env.DATABASE_HOST || 'localhost',
-        port: parseInt(process.env.DATABASE_PORT || '5432'),
-        username: process.env.DATABASE_USER || 'postgres',
-        password: process.env.DATABASE_PASSWORD || 'postgres',
-        database: process.env.DATABASE_NAME || 'foodio',
-        entities: [User, Category, MenuItem, Order, OrderItem],
-        synchronize: true,
-      }),
+      useFactory: () => {
+        const databaseUrl = process.env.DATABASE_URL;
+        if (databaseUrl) {
+          return {
+            type: 'postgres' as const,
+            url: databaseUrl,
+            entities: [User, Category, MenuItem, Order, OrderItem],
+            synchronize: true,
+            ssl: { rejectUnauthorized: false },
+          };
+        }
+        return {
+          type: 'postgres' as const,
+          host: process.env.DATABASE_HOST || 'localhost',
+          port: parseInt(process.env.DATABASE_PORT || '5432'),
+          username: process.env.DATABASE_USER || 'postgres',
+          password: process.env.DATABASE_PASSWORD || 'postgres',
+          database: process.env.DATABASE_NAME || 'foodio',
+          entities: [User, Category, MenuItem, Order, OrderItem],
+          synchronize: true,
+        };
+      },
     }),
     UsersModule,
     AuthModule,
