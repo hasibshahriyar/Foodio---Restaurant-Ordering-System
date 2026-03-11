@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { PlusCircle } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { MenuItem } from '@/lib/types';
 import { API_BASE } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -46,44 +46,66 @@ export default function FoodCard({ item }: Props) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
-        <Link href={`/menu/${item.id}`} className="block">
-          <div className="relative h-44 bg-[#FEF7EA]">
+      {/* mt-14 reserves space for the circular image protruding upward */}
+      <div className="relative mt-14 group">
+
+        {/* Circular food image — sits above the card */}
+        <Link
+          href={`/menu/${item.id}`}
+          className="absolute -top-[54px] left-1/2 -translate-x-1/2 z-10 block"
+        >
+          <div className="w-[118px] h-[118px] rounded-full overflow-hidden shadow-[0_4px_27px_rgba(0,0,0,0.15)] border-[5px] border-white">
             {imageUrl && !imgError ? (
               <Image
                 src={imageUrl}
                 alt={item.name}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                className="object-cover group-hover:scale-110 transition-transform duration-300"
                 onError={() => setImgError(true)}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-5xl">🍽️</div>
-            )}
-            {!item.isAvailable && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">Unavailable</span>
+              <div className="w-full h-full bg-[#FEF7EA] flex items-center justify-center text-4xl">
+                🍽️
               </div>
             )}
           </div>
         </Link>
-        <div className="p-4">
+
+        {/* Card body */}
+        <div className="relative bg-[#FEF7EA] rounded-tl-[34px] rounded-tr-none rounded-br-[34px] rounded-bl-none pt-[72px] pb-5 px-5">
+          {!item.isAvailable && (
+            <div className="absolute inset-0 bg-black/30 rounded-tl-[34px] rounded-br-[34px] flex items-center justify-center z-20">
+              <span className="text-white font-semibold text-sm bg-black/60 px-3 py-1 rounded-full">
+                Unavailable
+              </span>
+            </div>
+          )}
+
           <Link href={`/menu/${item.id}`}>
-            <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1 hover:text-primary-500 transition-colors">{item.name}</h3>
+            <h3 className="font-bold text-[18px] leading-[22px] text-[#1A1A1A] mb-2 hover:text-primary-500 transition-colors line-clamp-2">
+              {item.name}
+            </h3>
           </Link>
-          <p className="text-gray-500 text-sm line-clamp-2 mb-3">{item.description}</p>
-          <div className="flex items-center justify-between">
-            <span className="text-primary-500 font-bold text-lg">${Number(item.price).toFixed(2)}</span>
+
+          <p className="text-[14px] font-medium leading-[22px] text-[#7A7A7A] line-clamp-2 mb-5">
+            {item.description}
+          </p>
+
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[24px] font-extrabold leading-[22px] text-primary-500">
+              ${Number(item.price).toFixed(2)}
+            </span>
             <button
               onClick={handleAddToCart}
               disabled={!item.isAvailable}
-              className="flex items-center gap-1.5 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-[16px] font-semibold px-3 py-2.5 rounded-tl-[20px] rounded-tr-none rounded-br-[20px] rounded-bl-[20px] transition-colors whitespace-nowrap"
             >
-              <PlusCircle size={15} />
               Add to Cart
+              <ShoppingCart size={16} strokeWidth={1.5} />
             </button>
           </div>
         </div>
+
       </div>
 
       {showQuantityModal && (
@@ -96,3 +118,4 @@ export default function FoodCard({ item }: Props) {
     </>
   );
 }
+
