@@ -21,6 +21,7 @@ export default function FoodCard({ item }: Props) {
   const { addToCart } = useCart();
   const router = useRouter();
   const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const imageUrl = item.image
     ? item.image.startsWith('http')
@@ -47,13 +48,14 @@ export default function FoodCard({ item }: Props) {
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
         <Link href={`/menu/${item.id}`} className="block">
-          <div className="relative h-44 bg-gray-100">
-            {imageUrl ? (
+          <div className="relative h-44 bg-[#FEF7EA]">
+            {imageUrl && !imgError ? (
               <Image
                 src={imageUrl}
                 alt={item.name}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={() => setImgError(true)}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-5xl">🍽️</div>
