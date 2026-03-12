@@ -2,7 +2,7 @@
 
 A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **TypeScript**, and **PostgreSQL**.
 
-**Live Demo:** https://foodio-lyart.vercel.app  
+**Live Demo:** https://foodio-nine.vercel.app  
 **Backend API:** https://foodio-backend-9v1l.onrender.com
 
 ---
@@ -220,7 +220,7 @@ npm run start
 
 | Service  | Platform | URL                                          |
 |----------|----------|----------------------------------------------|
-| Frontend | Vercel   | https://foodio-lyart.vercel.app              |
+| Frontend | Vercel   | https://foodio-nine.vercel.app               |
 | Backend  | Render   | https://foodio-backend-9v1l.onrender.com     |
 
 The backend is kept alive via a GitHub Actions workflow (`.github/workflows/keep-alive.yml`) that pings it every 14 minutes to prevent Render's free tier from sleeping.
