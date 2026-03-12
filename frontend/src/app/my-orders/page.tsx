@@ -55,7 +55,7 @@ export default function MyOrdersPage() {
 
   return (
     <UserLayout>
-      <div className="px-[105px] py-[48px]">
+      <div className="px-4 sm:px-8 lg:px-[105px] py-8 lg:py-[48px]">
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: 32, color: '#1A3C34', marginBottom: 24 }}>
           My Orders
         </h1>

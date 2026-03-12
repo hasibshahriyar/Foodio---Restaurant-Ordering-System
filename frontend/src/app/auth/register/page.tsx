@@ -30,7 +30,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
       <div
-        className="w-[448px] bg-[#FBFAF8] border border-[#E6E2D8] rounded-[12px] p-[25px]"
+        className="w-full max-w-[448px] bg-[#FBFAF8] border border-[#E6E2D8] rounded-[12px] p-[25px]"
         style={{ boxShadow: '0px 21.7716px 54.4291px rgba(26,60,52,0.1)' }}
       >
         {/* Logo */}

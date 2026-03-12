@@ -43,8 +43,8 @@ export default function CartModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
       <div
-        className="flex flex-col max-h-[90vh]"
-        style={{ width: 420, background: '#FBFAF8', border: '1px solid #E6E2D8', borderRadius: 12, boxShadow: '0px 21.77px 54.43px rgba(26,60,52,0.1)' }}
+        className="flex flex-col max-h-[90vh] w-[calc(100vw-32px)] sm:w-[420px]"
+        style={{ background: '#FBFAF8', border: '1px solid #E6E2D8', borderRadius: 12, boxShadow: '0px 21.77px 54.43px rgba(26,60,52,0.1)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: '1px solid #E6E2D8' }}>

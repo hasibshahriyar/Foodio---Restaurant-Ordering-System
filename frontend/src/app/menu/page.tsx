@@ -54,7 +54,7 @@ export default function MenuPage() {
 
   return (
     <UserLayout>
-      <div className="px-[105px] py-[48px]">
+      <div className="px-4 sm:px-8 lg:px-[105px] py-8 lg:py-[48px]">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 600, fontSize: 54, color: '#1A3C34', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
@@ -163,7 +163,7 @@ export default function MenuPage() {
           </div>
 
           {/* Search */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="7" cy="7" r="5" stroke="#7A7A7A" strokeWidth="1.33"/>
               <path d="M11 11L14 14" stroke="#7A7A7A" strokeWidth="1.33" strokeLinecap="round"/>
@@ -173,15 +173,15 @@ export default function MenuPage() {
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-[36px] pl-9 pr-4 focus:outline-none"
-              style={{ width: 310, background: '#FBFAF8', border: '1px solid #E6E2D8', borderRadius: 56, fontFamily: 'Manrope, sans-serif', fontSize: 14, color: '#1A1A1A' }}
+              className="h-[36px] pl-9 pr-4 focus:outline-none w-full sm:w-[310px]"
+              style={{ background: '#FBFAF8', border: '1px solid #E6E2D8', borderRadius: 56, fontFamily: 'Manrope, sans-serif', fontSize: 14, color: '#1A1A1A' }}
             />
           </div>
         </div>
 
         {/* Food grid */}
         {loading ? (
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="rounded-[12px] border border-[#E6E2D8] overflow-hidden animate-pulse" style={{ background: '#FBFAF8' }}>
                 <div className="h-44" style={{ background: '#E6E2D8' }} />
@@ -198,7 +198,7 @@ export default function MenuPage() {
             <p>No items found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {items.map((item) => (
               <FoodCard key={item.id} item={item} />
             ))}
