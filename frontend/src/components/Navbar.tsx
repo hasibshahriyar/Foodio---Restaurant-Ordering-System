@@ -108,7 +108,19 @@ export default function Navbar() {
                   <ChevronDown size={14} />
                 </button>
                 {dropdownOpen && (
-                  <div style={{ position: 'absolute', right: 0, marginTop: 8, width: 141, background: 'white', border: '1px solid #E6E2D8', borderRadius: 6, zIndex: 50, overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', right: 0, marginTop: 8, width: 160, background: 'white', border: '1px solid #E6E2D8', borderRadius: 6, zIndex: 50, overflow: 'hidden' }}>
+                    {user.role === 'admin' && (
+                      <>
+                        <Link
+                          href="/admin"
+                          onClick={() => setDropdownOpen(false)}
+                          style={{ display: 'block', padding: '8px 12px', fontFamily: 'Manrope, sans-serif', fontSize: 13, color: '#1A3C34', fontWeight: 600, textDecoration: 'none' }}
+                        >
+                          Admin Dashboard
+                        </Link>
+                        <div style={{ borderTop: '1px solid #E6E2D8' }} />
+                      </>
+                    )}
                     <Link
                       href="/my-orders"
                       onClick={() => setDropdownOpen(false)}

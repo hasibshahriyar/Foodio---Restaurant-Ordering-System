@@ -16,8 +16,8 @@ export default function SignInPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      router.push('/');
+      const loggedInUser = await login(form.email, form.password);
+      router.push(loggedInUser.role === 'admin' ? '/admin' : '/');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Invalid credentials');
     } finally {
