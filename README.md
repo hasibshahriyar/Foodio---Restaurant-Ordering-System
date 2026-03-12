@@ -2,16 +2,20 @@
 
 A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **TypeScript**, and **PostgreSQL**.
 
+**Live Demo:** https://foodio-lyart.vercel.app  
+**Backend API:** https://foodio-backend-9v1l.onrender.com
+
 ---
 
 ## Tech Stack
 
-| Layer    | Technology                                      |
-|----------|-------------------------------------------------|
-| Frontend | Next.js 15, TypeScript, Tailwind CSS            |
-| Backend  | NestJS, TypeScript, TypeORM                     |
-| Database | PostgreSQL                                      |
-| Auth     | JWT (Bearer token), bcrypt password hashing     |
+| Layer      | Technology                                      |
+|------------|-------------------------------------------------|
+| Frontend   | Next.js 14, TypeScript, Tailwind CSS            |
+| Backend    | NestJS, TypeScript, TypeORM                     |
+| Database   | PostgreSQL                                      |
+| Auth       | JWT (Bearer token), bcrypt password hashing     |
+| Deployment | Vercel (frontend), Render (backend)             |
 
 ---
 
@@ -24,10 +28,14 @@ A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **Ty
 - Track order status: Pending → Preparing → Ready → Completed
 
 ### Admin
+- Redirected to `/admin` dashboard automatically on login
 - Manage menu items (Create / Edit / Delete, image upload, availability toggle)
 - Manage categories (Create / Delete)
 - View all orders with pagination
-- Update order status inline
+- Update order status inline via dropdown
+
+### Performance
+- Vercel Speed Insights integrated for real-user performance monitoring
 
 ---
 
@@ -205,3 +213,20 @@ cd frontend
 npm run build
 npm run start
 ```
+
+---
+
+## Deployment
+
+| Service  | Platform | URL                                          |
+|----------|----------|----------------------------------------------|
+| Frontend | Vercel   | https://foodio-lyart.vercel.app              |
+| Backend  | Render   | https://foodio-backend-9v1l.onrender.com     |
+
+The backend is kept alive via a GitHub Actions workflow (`.github/workflows/keep-alive.yml`) that pings it every 14 minutes to prevent Render's free tier from sleeping.
+
+---
+
+## License
+
+MIT
