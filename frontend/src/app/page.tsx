@@ -39,7 +39,7 @@ export default function HomePage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setHeroIndex((i) => (i + 1) % HERO_IMAGES.length);
-    }, 1000);
+    }, 3000);
     return () => clearInterval(timer);
   }, []);
 
