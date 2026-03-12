@@ -14,6 +14,7 @@ export default function MenuPage() {
   const [search, setSearch] = useState('');
   const [showSort, setShowSort] = useState(false);
   const [sortBy, setSortBy] = useState<'price' | 'name' | ''>('');
+  const [availableOnly, setAvailableOnly] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,13 +27,14 @@ export default function MenuPage() {
     if (activeCategory !== 'all') params.categoryId = activeCategory;
     if (search) params.search = search;
     if (sortBy) params.sortBy = sortBy;
+    if (availableOnly) params.isAvailable = 'true';
     api
       .get('/menu-items', { params })
       .then((res) => {
         setItems(res.data.data);
       })
       .finally(() => setLoading(false));
-  }, [activeCategory, search, sortBy]);
+  }, [activeCategory, search, sortBy, availableOnly]);
 
   useEffect(() => {
     const timer = setTimeout(fetchItems, 300);
@@ -110,17 +112,42 @@ export default function MenuPage() {
                 className="absolute right-0 top-full mt-2 z-30 py-1"
                 style={{ background: '#FFFFFF', border: '1px solid #E6E2D8', borderRadius: 8, boxShadow: '0px 4px 6px -1px rgba(0,0,0,0.1), 0px 2px 4px -2px rgba(0,0,0,0.1)', width: 213 }}
               >
-                <p className="px-3 py-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 16, color: '#1A3C34' }}>Sort by</p>
+                {/* Header row */}
+                <div className="flex items-center justify-between px-3 py-2">
+                  <p style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 16, color: '#1A3C34', margin: 0 }}>Sort by</p>
+                  {(sortBy || availableOnly) && (
+                    <button
+                      onClick={() => { setSortBy(''); setAvailableOnly(false); }}
+                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13, color: '#7A7A7A', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >Clear</button>
+                  )}
+                </div>
                 <div style={{ height: 1, background: '#E6E2D8', margin: '0 4px' }} />
+                {/* Availability toggle */}
+                <button
+                  onClick={() => setAvailableOnly(!availableOnly)}
+                  className="w-full flex items-center justify-between px-3 py-2 transition-colors"
+                  style={{ background: availableOnly ? '#F7F7F7' : 'transparent', borderRadius: 4, fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#1A1A1A', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  Availability
+                  <div style={{ width: 16, height: 16, borderRadius: 4, border: '1.5px solid #E6E2D8', background: availableOnly ? '#1A3C34' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {availableOnly && (
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M1.5 5L4 7.5L8.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                </button>
+                {/* Sort options */}
                 {[{ value: 'price', label: 'Price' }, { value: 'name', label: 'Name (A–Z)' }].map(opt => (
                   <button
                     key={opt.value}
-                    onClick={() => { setSortBy(opt.value as 'price' | 'name'); setShowSort(false); }}
+                    onClick={() => { setSortBy(sortBy === opt.value ? '' : opt.value as 'price' | 'name'); }}
                     className="w-full flex items-center justify-between px-3 py-2 transition-colors"
                     style={{
                       background: sortBy === opt.value ? '#F7F7F7' : 'transparent',
                       borderRadius: 4,
-                      fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#1A1A1A'
+                      fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#1A1A1A', border: 'none', cursor: 'pointer', textAlign: 'left'
                     }}
                   >
                     {opt.label}
@@ -131,18 +158,6 @@ export default function MenuPage() {
                     )}
                   </button>
                 ))}
-                {sortBy && (
-                  <>
-                    <div style={{ height: 1, background: '#E6E2D8', margin: '0 4px' }} />
-                    <button
-                      onClick={() => { setSortBy(''); setShowSort(false); }}
-                      className="w-full px-3 py-2 text-center"
-                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 14, color: '#7A7A7A' }}
-                    >
-                      Clear
-                    </button>
-                  </>
-                )}
               </div>
             )}
           </div>
