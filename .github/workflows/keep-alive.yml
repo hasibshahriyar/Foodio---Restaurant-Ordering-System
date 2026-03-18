@@ -13,10 +13,26 @@ jobs:
       - name: Ping Render backend health endpoint
         run: |
           echo "Pinging backend at $(date)"
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.RENDER_BACKEND_URL }}/health" --max-time 30)
+          BACKEND_URL="${{ secrets.RENDER_BACKEND_URL }}"
+          
+          if [ -z "$BACKEND_URL" ]; then
+            echo "❌ Error: RENDER_BACKEND_URL secret is not set!"
+            exit 1
+          fi
+          
+          echo "Using backend URL: $BACKEND_URL"
+          
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/health" --max-time 30 --connect-timeout 10)
+          EXIT_CODE=$?
+          
           echo "Response status: $STATUS"
-          if [ "$STATUS" != "200" ]; then
-            echo "Warning: backend returned status $STATUS"
+          echo "Curl exit code: $EXIT_CODE"
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ Curl failed with exit code $EXIT_CODE"
+            exit 1
+          elif [ "$STATUS" != "200" ]; then
+            echo "⚠️  Warning: backend returned status $STATUS"
           else
-            echo "Backend is alive ✓"
+            echo "✓ Backend is alive ✓"
           fi
