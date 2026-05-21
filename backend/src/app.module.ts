@@ -13,6 +13,7 @@ import { Category } from './categories/category.entity';
 import { MenuItem } from './menu-items/menu-item.entity';
 import { Order } from './orders/order.entity';
 import { OrderItem } from './orders/order-item.entity';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { OrderItem } from './orders/order-item.entity';
     CategoriesModule,
     MenuItemsModule,
     OrdersModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

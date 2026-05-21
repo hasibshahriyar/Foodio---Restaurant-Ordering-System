@@ -1,6 +1,6 @@
 # Foodio 🍽️ — Restaurant Ordering System
 
-A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **TypeScript**, and **PostgreSQL**.
+A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **TypeScript**, and **PostgreSQL** — featuring integrated **Stripe payments**.
 
 **Live Demo:** https://foodio-nine.vercel.app  
 **Backend API:** https://foodio-backend-9v1l.onrender.com
@@ -13,8 +13,9 @@ A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **Ty
 |------------|-------------------------------------------------|
 | Frontend   | Next.js 14, TypeScript, Tailwind CSS            |
 | Backend    | NestJS, TypeScript, TypeORM                     |
-| Database   | PostgreSQL                                      |
+| Database   | PostgreSQL (Neon serverless)                    |
 | Auth       | JWT (Bearer token), bcrypt password hashing     |
+| Payments   | Stripe (PaymentIntents API)                     |
 | Deployment | Vercel (frontend), Render (backend)             |
 
 ---
@@ -24,8 +25,17 @@ A full-stack restaurant ordering system built with **Next.js**, **NestJS**, **Ty
 ### User (Public / Authenticated)
 - Browse menu by category with live search and sort/filter
 - Add items to cart (persisted in localStorage)
-- Place consolidated orders
+- Place orders with **payment choice at checkout**:
+  - 💳 **Pay with Card** — Stripe-powered card payment modal
+  - 🚪 **Cash on Delivery** — order placed, pay on arrival
 - Track order status: Pending → Preparing → Ready → Completed
+
+### Payments (Stripe Integration)
+- Secure PaymentIntents API — card details never touch the server
+- Payment modal with separate Card Number, Expiry, and CVC fields
+- On successful card payment, order status automatically moves to **Preparing**
+- Cash on Delivery orders remain **Pending** until manually updated
+- Test card: `4242 4242 4242 4242` / `12/27` / `123`
 
 ### Admin
 - Redirected to `/admin` dashboard automatically on login

@@ -8,12 +8,16 @@ import toast from 'react-hot-toast';
 import { useState } from 'react';
 import { API_BASE } from '@/lib/api';
 import Image from 'next/image';
+import PaymentModal from './PaymentModal';
 
 export default function CartModal() {
   const { cart, cartTotal, updateQuantity, removeFromCart, clearCartItems, closeCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [placing, setPlacing] = useState(false);
+  const [step, setStep] = useState<'cart' | 'payment-choice'>('cart');
+  const [createdOrder, setCreatedOrder] = useState<{ id: string; amount: number } | null>(null);
+  const [pendingOrder, setPendingOrder] = useState<{ id: string; amount: number } | null>(null);
 
   const handleConfirmOrder = async () => {
     if (!user) {
@@ -23,14 +27,13 @@ export default function CartModal() {
     }
     setPlacing(true);
     try {
-      await api.post('/orders', {
+      const res = await api.post('/orders', {
         items: cart.map((c) => ({ menuItemId: c.menuItem.id, quantity: c.quantity })),
         deliveryAddress: user.address,
       });
-      clearCartItems();
-      closeCart();
-      toast.success('Your Order has been confirmed!');
-      router.push('/my-orders');
+      const order = res.data;
+      setCreatedOrder({ id: order.id, amount: Math.round(Number(order.totalAmount) * 100) });
+      setStep('payment-choice');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to place order');
     } finally {
@@ -38,9 +41,25 @@ export default function CartModal() {
     }
   };
 
+  const handleCashOnDelivery = () => {
+    clearCartItems();
+    closeCart();
+    toast.success('Order placed! Pay on delivery.');
+    router.push('/my-orders');
+  };
+
+  const handlePaymentSuccess = () => {
+    clearCartItems();
+    closeCart();
+    setPendingOrder(null);
+    toast.success('Payment confirmed! Your order is being prepared.');
+    router.push('/my-orders');
+  };
+
   const totalItems = cart.reduce((s, c) => s + c.quantity, 0);
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
       <div
         className="flex flex-col max-h-[90vh] w-[calc(100vw-32px)] sm:w-[420px]"
@@ -49,7 +68,9 @@ export default function CartModal() {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4" style={{ borderBottom: '1px solid #E6E2D8' }}>
           <div className="flex items-center gap-3">
-            <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 18, color: '#1A3C34' }}>Cart</span>
+            <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 18, color: '#1A3C34' }}>
+              {step === 'payment-choice' ? 'Choose Payment' : 'Cart'}
+            </span>
             {cart.length > 0 && (
               <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 400, fontSize: 14, color: '#7A7A7A' }}>{totalItems} Items</span>
             )}
@@ -146,7 +167,7 @@ export default function CartModal() {
         </div>
 
         {/* Footer */}
-        {cart.length > 0 && (
+        {cart.length > 0 && step === 'cart' && (
           <div className="px-5 pb-5 pt-4" style={{ borderTop: '1px solid #E6E2D8' }}>
             <div className="flex items-center justify-between mb-4">
               <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>Total Amount :</span>
@@ -171,7 +192,42 @@ export default function CartModal() {
             </div>
           </div>
         )}
+
+        {step === 'payment-choice' && createdOrder && (
+          <div className="px-5 pb-5 pt-4" style={{ borderTop: '1px solid #E6E2D8' }}>
+            <p className="mb-4 text-center" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 400, fontSize: 13, color: '#7A7A7A' }}>
+              Order placed! How would you like to pay?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => setPendingOrder(createdOrder)}
+                className="w-full h-[44px] font-semibold transition-opacity"
+                style={{ background: '#E07B39', borderRadius: 56, fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 14, color: 'white', border: 'none' }}
+              >
+                💳 Pay with Card
+              </button>
+              <button
+                onClick={handleCashOnDelivery}
+                className="w-full h-[44px] font-semibold transition-colors"
+                style={{ border: '1px solid #1A3C34', borderRadius: 56, fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: 14, color: '#1A3C34', background: 'transparent' }}
+              >
+                🚪 Cash on Delivery
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+
+    {pendingOrder && (
+      <PaymentModal
+        isOpen={true}
+        onClose={() => setPendingOrder(null)}
+        amount={pendingOrder.amount}
+        orderId={pendingOrder.id}
+        onSuccess={handlePaymentSuccess}
+      />
+    )}
+  </>
   );
 }
