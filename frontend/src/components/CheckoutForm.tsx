@@ -1,14 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const elementStyle = {
-  style: {
-    base: { fontSize: '16px', color: '#424770', '::placeholder': { color: '#aab7c4' } },
-  },
-};
-
-export default function CheckoutForm({ amount, orderId, onSuccess }: { amount: number; orderId?: string; onSuccess?: () => void }) {
+export default function CheckoutForm({ amount, onSuccess }: { amount: number; orderId?: string; onSuccess?: () => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState('');
@@ -22,83 +16,64 @@ export default function CheckoutForm({ amount, orderId, onSuccess }: { amount: n
     setMessage('');
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment/create-intent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ amount, currency: 'usd', orderId }),
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
       });
 
-      if (!res.ok) {
-        const err = await res.text();
-        setMessage(`Backend error: ${err}`);
-        return;
-      }
-
-      const data = await res.json();
-      console.log('Backend response:', data);
-
-      if (!data.clientSecret) {
-        setMessage('No clientSecret received from backend');
-        return;
-      }
-
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardNumberElement)!,
-        },
-      });
-
-      if (result.error) {
-        setMessage(result.error.message || 'Payment failed');
-      } else if (result.paymentIntent?.status === 'succeeded') {
-        setMessage('🎉 Payment successful!');
+      if (error) {
+        setMessage(error.message || 'Payment failed. Please try again.');
+      } else if (paymentIntent?.status === 'succeeded') {
         if (onSuccess) onSuccess();
+      } else {
+        setMessage('Payment is processing. Please wait.');
       }
     } catch (err: any) {
-      console.error('Payment error:', err);
-      setMessage(`Error: ${err.message}`);
+      setMessage(`Something went wrong: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-8 border-2 border-gray-200 rounded-xl w-[480px] shadow-lg bg-white">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-        <div className="p-4 border-2 border-gray-300 rounded-lg">
-          <CardNumberElement options={elementStyle} />
-        </div>
-      </div>
-
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-          <div className="p-4 border-2 border-gray-300 rounded-lg">
-            <CardExpiryElement options={elementStyle} />
-          </div>
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-2">CVC</label>
-          <div className="p-4 border-2 border-gray-300 rounded-lg">
-            <CardCvcElement options={elementStyle} />
-          </div>
-        </div>
-      </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          paymentMethodOrder: ['card'],
+        }}
+      />
 
       <button
         type="submit"
-        disabled={!stripe || loading}
-        className="bg-orange-500 text-white py-4 text-lg font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors mt-2"
+        disabled={!stripe || !elements || loading}
+        className="w-full bg-orange-500 text-white py-3.5 text-base font-semibold rounded-lg hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 mt-1"
       >
-        {loading ? 'Processing...' : `Pay $${amount / 100}`}
+        {loading ? (
+          <>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+              <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+            </svg>
+            Pay ${(amount / 100).toFixed(2)}
+          </>
+        )}
       </button>
 
-      {message && <p className="text-center text-lg font-semibold">{message}</p>}
+      {message && (
+        <p className={`text-center text-sm font-medium py-2 px-4 rounded-lg ${
+          message.includes('failed') || message.includes('wrong') || message.includes('error')
+            ? 'bg-red-50 text-red-600'
+            : 'bg-gray-50 text-gray-600'
+        }`}>
+          {message}
+        </p>
+      )}
     </form>
   );
 }
