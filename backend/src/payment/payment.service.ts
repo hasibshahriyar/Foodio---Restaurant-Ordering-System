@@ -21,6 +21,7 @@ export class PaymentService {
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount,
       currency,
+      payment_method_types: ['card'],
       metadata: { orderId: orderId || '' },
     });
 

@@ -9,6 +9,7 @@ import api from '@/lib/api';
 import PaymentModal from '@/components/PaymentModal';
 
 const STATUS_STEPS: OrderStatus[] = ['Pending', 'Preparing', 'Ready', 'Completed'];
+const DISPLAY_STEPS = ['Order Placed', 'Confirmed', 'Preparing', 'Ready', 'Completed'];
 
 export default function MyOrdersPage() {
   const { user, loading: authLoading } = useAuth();
@@ -47,13 +48,13 @@ export default function MyOrdersPage() {
     });
   };
 
-  const getStepIndex = (status: OrderStatus) => STATUS_STEPS.indexOf(status);
+  const getDisplayStepIdx = (status: OrderStatus) => STATUS_STEPS.indexOf(status) + 1;
 
   const statusBadgeStyle = (s: OrderStatus): React.CSSProperties => {
     if (s === 'Completed')
       return { background: 'rgba(0,130,54,0.1)', color: '#008236', border: '1px solid rgba(0,130,54,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
     if (s === 'Pending')
-      return { background: 'rgba(240,177,0,0.1)', color: '#D08700', border: '1px solid rgba(240,177,0,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
+      return { background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
     if (s === 'Preparing')
       return { background: 'rgba(59,130,246,0.1)', color: '#2563EB', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
     return { background: 'rgba(100,116,139,0.1)', color: '#475569', border: '1px solid rgba(100,116,139,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
@@ -83,7 +84,7 @@ export default function MyOrdersPage() {
         ) : (
           <div className="space-y-5">
             {orders.map((order) => {
-              const stepIdx = getStepIndex(order.status);
+              const displayIdx = getDisplayStepIdx(order.status);
               return (
                 <div key={order.id} className="rounded-[12px] border border-[#E6E2D8] p-6" style={{ background: '#FBFAF8' }}>
                   {/* Header row */}
@@ -97,7 +98,9 @@ export default function MyOrdersPage() {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span style={statusBadgeStyle(order.status)}>{order.status}</span>
+                      <span style={statusBadgeStyle(order.status)}>
+                        {order.status === 'Pending' ? 'Confirmed' : order.status}
+                      </span>
                       {order.status === 'Pending' && (
                         <button
                           onClick={() => setPaymentOrder(order)}
@@ -138,25 +141,27 @@ export default function MyOrdersPage() {
                     <div style={{ height: 1, background: '#E6E2D8', margin: '12px 0' }} />
                     <div className="flex items-center justify-between">
                       <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 16, color: '#1A1A1A' }}>Total Amount :</span>
-                      <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 16, color: '#1A3C34' }}>${Number(order.totalAmount).toFixed(2)}</span>
+                      <span style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 700, fontSize: 16, color: '#1A3C34' }}>
+                        ${(Number(order.totalAmount) > 0 ? Number(order.totalAmount) : order.items.reduce((s, i) => s + i.price * i.quantity, 0)).toFixed(2)}
+                      </span>
                     </div>
                   </div>
 
                   {/* Status tracker */}
                   <div className="flex items-center gap-0">
-                    {STATUS_STEPS.map((step, i) => {
-                      const active = i <= stepIdx;
+                    {DISPLAY_STEPS.map((label, i) => {
+                      const active = i <= displayIdx;
                       return (
-                        <div key={step} className="flex-1">
+                        <div key={label} className="flex-1">
                           <div
                             className="h-[6px] rounded-full"
                             style={{
                               background: active ? '#1A3C34' : '#E4E4E4',
-                              marginRight: i < STATUS_STEPS.length - 1 ? 4 : 0,
+                              marginRight: i < DISPLAY_STEPS.length - 1 ? 4 : 0,
                             }}
                           />
-                          <p className="mt-1.5 text-center" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 11, color: active ? '#1A3C34' : '#7A7A7A' }}>
-                            {step}
+                          <p className="mt-1.5 text-center" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 10, color: active ? '#1A3C34' : '#7A7A7A' }}>
+                            {label}
                           </p>
                         </div>
                       );
