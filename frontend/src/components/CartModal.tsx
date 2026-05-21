@@ -40,11 +40,27 @@ export default function CartModal() {
     }
   };
 
-  const handleCashOnDelivery = () => {
-    clearCartItems();
-    closeCart();
-    toast.success('Order placed! Pay on delivery.');
-    router.push('/my-orders');
+  const handleCashOnDelivery = async () => {
+    if (!user) {
+      closeCart();
+      router.push('/auth/signin');
+      return;
+    }
+    setPlacing(true);
+    try {
+      await api.post('/orders', {
+        items: cart.map((c) => ({ menuItemId: c.menuItem.id, quantity: c.quantity })),
+        deliveryAddress: user.address,
+      });
+      clearCartItems();
+      closeCart();
+      toast.success('Order placed! Pay on delivery.');
+      router.push('/my-orders');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to place order');
+    } finally {
+      setPlacing(false);
+    }
   };
 
   const handlePaymentSuccess = () => {
