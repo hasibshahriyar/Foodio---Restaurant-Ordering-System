@@ -48,8 +48,12 @@ export default function PaymentModal({ isOpen, onClose, amount, orderId, onSucce
       },
       body: JSON.stringify({ amount, currency: 'usd', orderId }),
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          setFetchError(data?.message || `Server error (${res.status}). Please try again.`);
+          return;
+        }
         if (data.clientSecret) setClientSecret(data.clientSecret);
         else setFetchError('Could not initialize payment. Please try again.');
       })

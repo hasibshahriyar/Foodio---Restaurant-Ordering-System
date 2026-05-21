@@ -6,6 +6,7 @@ import UserLayout from '@/components/UserLayout';
 import { useAuth } from '@/context/AuthContext';
 import { Order, OrderStatus } from '@/lib/types';
 import api from '@/lib/api';
+import PaymentModal from '@/components/PaymentModal';
 
 const STATUS_STEPS: OrderStatus[] = ['Pending', 'Preparing', 'Ready', 'Completed'];
 
@@ -14,12 +15,17 @@ export default function MyOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [paymentOrder, setPaymentOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/signin');
     }
   }, [user, authLoading, router]);
+
+  const refreshOrders = () => {
+    api.get('/orders/my-orders').then((res) => setOrders(res.data));
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -90,7 +96,21 @@ export default function MyOrdersPage() {
                         {formatDate(order.createdAt)}
                       </p>
                     </div>
-                    <span style={statusBadgeStyle(order.status)}>{order.status}</span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span style={statusBadgeStyle(order.status)}>{order.status}</span>
+                      {order.status === 'Pending' && (
+                        <button
+                          onClick={() => setPaymentOrder(order)}
+                          className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                            <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                          </svg>
+                          Pay with Card
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Delivery address */}
@@ -148,6 +168,16 @@ export default function MyOrdersPage() {
           </div>
         )}
       </div>
+      <PaymentModal
+        isOpen={!!paymentOrder}
+        onClose={() => setPaymentOrder(null)}
+        amount={paymentOrder ? Math.round(Number(paymentOrder.totalAmount) * 100) : 0}
+        orderId={paymentOrder?.id || ''}
+        onSuccess={() => {
+          setPaymentOrder(null);
+          refreshOrders();
+        }}
+      />
     </UserLayout>
   );
 }
