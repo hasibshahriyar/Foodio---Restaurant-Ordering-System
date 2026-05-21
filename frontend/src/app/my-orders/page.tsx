@@ -8,7 +8,7 @@ import { Order, OrderStatus } from '@/lib/types';
 import api from '@/lib/api';
 import PaymentModal from '@/components/PaymentModal';
 
-const STATUS_STEPS: OrderStatus[] = ['Pending', 'Preparing', 'Ready', 'Completed'];
+const STATUS_STEPS: OrderStatus[] = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Completed'];
 const DISPLAY_STEPS = ['Order Placed', 'Confirmed', 'Preparing', 'Ready', 'Completed'];
 
 export default function MyOrdersPage() {
@@ -50,8 +50,9 @@ export default function MyOrdersPage() {
 
   const getDisplayStepIdx = (status: OrderStatus): number => {
     const map: Record<OrderStatus, number> = {
-      'Pending': 0,    // only "Order Placed" lit
-      'Preparing': 2,  // Order Placed + Confirmed + Preparing lit
+      'Pending': 0,
+      'Confirmed': 1,
+      'Preparing': 2,
       'Ready': 3,
       'Completed': 4,
     };
@@ -62,6 +63,8 @@ export default function MyOrdersPage() {
     if (s === 'Completed')
       return { background: 'rgba(0,130,54,0.1)', color: '#008236', border: '1px solid rgba(0,130,54,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
     if (s === 'Pending')
+      return { background: 'rgba(100,116,139,0.1)', color: '#64748B', border: '1px solid rgba(100,116,139,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
+    if (s === 'Confirmed')
       return { background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
     if (s === 'Preparing')
       return { background: 'rgba(59,130,246,0.1)', color: '#2563EB', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '2px 10px', fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: 13 };
@@ -107,7 +110,7 @@ export default function MyOrdersPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span style={statusBadgeStyle(order.status)}>
-                        {order.status === 'Pending' ? 'Confirmed' : order.status}
+                        {order.status === 'Pending' ? 'Order Placed' : order.status}
                       </span>
                       {order.status === 'Pending' && (
                         <button

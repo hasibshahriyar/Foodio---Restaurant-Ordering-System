@@ -28,7 +28,7 @@ export class PaymentService {
     if (orderId) {
       const order = await this.ordersRepository.findOne({ where: { id: orderId } });
       if (!order) throw new NotFoundException('Order not found');
-      order.status = OrderStatus.PREPARING;
+      order.status = OrderStatus.CONFIRMED;
       await this.ordersRepository.save(order);
     }
 

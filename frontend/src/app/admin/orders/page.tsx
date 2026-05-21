@@ -7,7 +7,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import OrderDetailsModal from '@/components/admin/OrderDetailsModal';
 
-const STATUS_OPTIONS: OrderStatus[] = ['Pending', 'Preparing', 'Ready', 'Completed'];
+const STATUS_OPTIONS: OrderStatus[] = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Completed'];
 
 export default function AdminOrdersPage() {
   const [data, setData] = useState<PaginatedResponse<Order> | null>(null);
@@ -64,7 +64,9 @@ export default function AdminOrdersPage() {
 
   const statusBadgeStyle = (s: OrderStatus): React.CSSProperties => {
     if (s === 'Completed') return { background: 'rgba(0,130,54,0.1)', color: '#008236' };
+    if (s === 'Confirmed') return { background: 'rgba(22,163,74,0.1)', color: '#16A34A' };
     if (s === 'Ready') return { background: 'rgba(0,100,200,0.1)', color: '#0064C8' };
+    if (s === 'Preparing') return { background: 'rgba(59,130,246,0.1)', color: '#2563EB' };
     return { background: 'rgba(240,177,0,0.1)', color: '#D08700' };
   };
 
