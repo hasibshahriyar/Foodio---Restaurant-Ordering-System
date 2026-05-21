@@ -30,6 +30,8 @@ export default function CartModal() {
         deliveryAddress: user.address,
       });
       const order = res.data;
+      clearCartItems();
+      closeCart();
       setPendingOrder({ id: order.id, amount: Math.round(Number(order.totalAmount) * 100) });
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to place order');
@@ -46,8 +48,6 @@ export default function CartModal() {
   };
 
   const handlePaymentSuccess = () => {
-    clearCartItems();
-    closeCart();
     setPendingOrder(null);
     toast.success('Payment confirmed! Your order is being prepared.');
     router.push('/my-orders');
